@@ -4,6 +4,15 @@ import { Router, Route, IndexRoute } from 'react-router';
 import App from './App';
 import { PostList, PostEdit } from './Posts';
 import { CategoryList, CategoryEdit } from './Categories';
+import { UserLogin } from './Users';
+import { UserAuthWrapper } from 'redux-auth-wrapper'
+import { routerReducer, syncHistoryWithStore, routerActions, routerMiddleware } from 'react-router-redux'
+
+const UserIsAuthenticated = UserAuthWrapper({
+  authSelector: state => state.user, // how to get the user state
+  redirectAction: routerActions.replace, // the redux action to dispatch for redirect
+  wrapperDisplayName: 'UserIsAuthenticated' // a nice name for this auth check
+})
 
 export default class Routes extends PureComponent {
   static propTypes = {
@@ -15,7 +24,7 @@ export default class Routes extends PureComponent {
 
     return (
       <Router history={history}>
-        <Route path="/" component={App}>
+        <Route path="/" component={UserIsAuthenticated(App)}>
           <IndexRoute component={PostList}/>
           <Route path="/posts" component={PostList}/>
           <Route path="/posts/new" component={PostEdit}/>

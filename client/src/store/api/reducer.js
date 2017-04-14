@@ -27,6 +27,16 @@ const addIncluded = (newState, included = []) => {
   return newState;
 };
 
+const userReducer = (state = {}, { type, payload }) => {
+  if (type === USER_LOGGED_IN) {
+    return payload
+  }
+  if (type === USER_LOGGED_OUT) {
+    return {}
+  }
+  return state
+}
+
 export default (state = initialState, action) => {
   const { type, payload, meta } = action;
   const { key } = meta || {};
