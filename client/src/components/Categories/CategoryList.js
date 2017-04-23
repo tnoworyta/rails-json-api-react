@@ -15,11 +15,16 @@ export class CategoryList extends Component {
 
     return (
       <div>
-        {categories.data.map(category =>
-          <div key={category.id}>
-            <Link to={`/categories/${category.id}`}>{category.name}</Link>
-          </div>
-        )}
+        <p>
+          <Link to={'/categories/new'}>New category</Link>
+        </p>
+        <div>
+          {categories.data.map(category =>
+            <div key={category.id}>
+              <Link to={`/categories/${category.id}`}>{category.name}</Link>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
