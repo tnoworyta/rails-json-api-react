@@ -9,6 +9,7 @@ import {
   values,
   keys,
   zipObject,
+  pick,
 } from 'lodash';
 
 import { denormalize, normalize } from './normalize';
@@ -19,6 +20,8 @@ export const GET_MANY = 'GET_MANY';
 export const CREATE = 'CREATE';
 export const UPDATE = 'UPDATE';
 export const DELETE = 'DELETE';
+export const AUTH_LOGIN = 'AUTH_LOGIN';
+export const AUTH_LOGOUT = 'AUTH_LOGOUT';
 
 const client = axios.create({
   baseURL: '/',
@@ -47,6 +50,15 @@ const normalizeResponse = response => {
     }));
 };
 
+const normalizeErrors = response => {
+  throw get(response, 'response.data.errors')
+    .reduce((errors, error) => {
+      const attribute = /attributes\/(.*)$/.exec(get(error, 'source.pointer'))[1];
+      errors[attribute] = error.title;
+      return errors;
+    }, {});
+};
+
 export default (request, payload, meta) => {
   const {
     url = `${meta.key}`,
@@ -67,25 +79,40 @@ export default (request, payload, meta) => {
         url: withParams(`${url}`, params),
         method: 'GET',
         data: JSON.stringify(payload),
-      }).then(normalizeResponse);
+      }).then(normalizeResponse).then((res) => ({...res, params}));
     case CREATE:
       return client({
         url: withParams(url),
         method: 'POST',
         data: denormalize(meta.key, payload),
-      }).then(normalizeResponse);
+      }).then(normalizeResponse).catch(normalizeErrors);
     case UPDATE: {
       return client({
         url: withParams(`${url}/${payload.id}`),
         method: 'PUT',
         data: denormalize(meta.key, payload),
-      }).then(normalizeResponse);
+      }).then(normalizeResponse).catch(normalizeErrors);
     }
     case DELETE:
       return client({
         url: withParams(`${url}/${payload.id}`),
         method: 'DELETE',
       }).then(response => normalizeResponse({ data: payload }));
+    case AUTH_LOGIN:
+      return client({
+        url: 'auth/sign_in',
+        method: 'POST',
+        data: payload,
+      }).then(response => ({
+        ...response.data.data,
+        ...pick(response.headers, ['access-token', 'client']),
+      }));
+    case AUTH_LOGOUT:
+      return client({
+        url: 'auth/sign_out',
+        method: 'DELETE',
+        data: payload,
+      });
     default:
       throw `No client handler for ${request}`;
   }

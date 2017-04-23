@@ -15,6 +15,8 @@ import {
   CREATE,
   UPDATE,
   DELETE,
+  AUTH_LOGIN,
+  AUTH_LOGOUT,
 } from './client';
 
 import {
@@ -24,7 +26,9 @@ import {
   actionType,
 } from './actions';
 
-const initialState = {};
+const initialState = {
+  user: JSON.parse(localStorage.getItem('user') || '{}'),
+};
 
 const addNormalized = (newState, payload) => {
   keys(payload.normalized).forEach(key => {
@@ -47,6 +51,7 @@ export default (state = initialState, action) => {
     case actionType(GET_LIST, SUCCESS): {
       newState = addNormalized(newState, payload);
       newState = imm.set(newState, [key, 'list', 'ids'], map(payload.data, 'id'));
+      newState = imm.set(newState, [key, 'list', 'params'], payload.params);
       newState = imm.set(newState, [key, 'list', 'links'], payload.links);
       newState = imm.set(newState, [key, 'list', 'meta'], payload.meta);
       return newState;
@@ -65,6 +70,16 @@ export default (state = initialState, action) => {
       newState = imm.set(newState, [key, 'list', 'ids'],
         without(get(newState, [key, 'list', 'ids']), payload.data.id)
       );
+      return newState;
+    }
+    case actionType(AUTH_LOGIN, SUCCESS): {
+      localStorage.setItem('user', JSON.stringify(payload));
+      newState = imm.set(newState, ['user'], payload);
+      return newState;
+    }
+    case actionType(AUTH_LOGOUT, SUCCESS): {
+      localStorage.removeItem('user');
+      newState = imm.set(newState, ['user'], {});
       return newState;
     }
     default:

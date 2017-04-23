@@ -5,6 +5,8 @@ import client, {
   CREATE,
   UPDATE,
   DELETE,
+  AUTH_LOGIN,
+  AUTH_LOGOUT,
 } from './client';
 
 export const STARTED = 'STARTED';
@@ -28,8 +30,9 @@ const createAsyncAction = (request) => (key, payload = {}, _meta = {}) => (dispa
       dispatch(createAction(request, SUCCESS)(key, response, meta));
       return response;
     })
-    .catch(err => {
-      dispatch(createAction(request, FAILED)(key, err, meta));
+    .catch(error => {
+      dispatch(createAction(request, FAILED)(key, error, meta));
+      throw error;
     });
 };
 
@@ -39,3 +42,5 @@ export const fetchMany = createAsyncAction(GET_MANY);
 export const createResource = createAsyncAction(CREATE);
 export const updateResource = createAsyncAction(UPDATE);
 export const deleteResource = createAsyncAction(DELETE);
+export const login = createAsyncAction(AUTH_LOGIN);
+export const logout = createAsyncAction(AUTH_LOGOUT);

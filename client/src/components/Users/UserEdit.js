@@ -3,9 +3,10 @@ import { Link } from 'react-router';
 import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
 import { SubmissionError } from 'redux-form';
-import { find, omit } from 'lodash';
+import { get, find, omit } from 'lodash';
 
-import CategoryForm from './CategoryForm';
+import UserForm from './UserForm';
+
 import {
   fetchOne,
   createResource,
@@ -14,7 +15,7 @@ import {
   getOne,
 } from '../../store/api';
 
-export class CategoryEdit extends Component {
+export class UserEdit extends Component {
   componentWillMount() {
     const { params, fetchResource } = this.props;
 
@@ -48,10 +49,10 @@ export class CategoryEdit extends Component {
     return (
       <div>
         <p>
-          <Link to={`/categories`}>Back to Categories</Link>
+          <Link to={`/users`}>Back to Users</Link>
         </p>
 
-        <h2>{ isNew ? 'New Category' : resource.name }</h2>
+        <h2>{ isNew ? 'New User' : resource.email }</h2>
 
         { !isNew &&
         <p>
@@ -59,7 +60,7 @@ export class CategoryEdit extends Component {
         </p>
         }
 
-        <CategoryForm initialValues={resource} onSubmit={this.onSubmit} />
+        <UserForm initialValues={resource} onSubmit={this.onSubmit}></UserForm>
       </div>
     );
   }
@@ -67,15 +68,15 @@ export class CategoryEdit extends Component {
 
 export const mapStateToProps = (state, props) => ({
   isNew: !props.params.id,
-  resource: getOne(state, 'categories', props.params.id),
+  resource: getOne(state, 'users', props.params.id),
 });
 
 export const mapDispatchToProps = (dispatch) => ({
-  fetchResource: (id) => dispatch(fetchOne('categories', { id })),
-  createResource: (resource) => dispatch(createResource('categories', resource)),
-  updateResource: (resource) => dispatch(updateResource('categories', resource)),
-  deleteResource: (resource) => dispatch(deleteResource('categories', resource)),
-  redirectToIndex: () => dispatch(push('/categories')),
+  fetchResource: (id) => dispatch(fetchOne('users', { id })),
+  createResource: (resource) => dispatch(createResource('users', resource)),
+  updateResource: (resource) => dispatch(updateResource('users', resource)),
+  deleteResource: (resource) => dispatch(deleteResource('users', resource)),
+  redirectToIndex: () => dispatch(push('/users')),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(CategoryEdit);
+export default connect(mapStateToProps, mapDispatchToProps)(UserEdit);
